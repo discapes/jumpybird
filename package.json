@@ -1,0 +1,27 @@
+{
+  "name": "jumpybird",
+  "version": "1.0.0",
+  "description": "Classic arcade game.",
+  "scripts": {
+    "babel": "cross-env BABEL_ENV=production babel index.jsx -o public/index.js",
+    "tailwind": "tailwindcss -i ./styles.css -o ./public/global.css",
+    "build": "concurrently npm:babel npm:tailwind",
+    "watch-babel": "cross-env BABEL_ENV=production babel index.jsx -o public/index.js --watch",
+    "watch-tailwind": "tailwindcss -i ./styles.css -o ./public/global.css --watch",
+    "watch-reload": "livereload public",
+    "start": "serve public",
+    "dev": "concurrently npm:watch-* npm:start"
+  },
+  "author": "Miika Tuominen",
+  "devDependencies": {
+    "@babel/cli": "^7.18.6",
+    "@babel/core": "^7.18.6",
+    "@babel/preset-react": "^7.18.6",
+    "concurrently": "^7.2.2",
+    "cross-env": "^7.0.3",
+    "live-reload": "^1.1.1",
+    "npm-run-all": "^4.1.5",
+    "serve": "^13.0.4",
+    "tailwindcss": "^3.1.4"
+  }
+}
