@@ -1,6 +1,8 @@
-const useRef = React.useRef;
-const useState = React.useState;
-const useEffect = React.useEffect;
+const {
+  useRef,
+  useState,
+  useEffect
+} = React;
 let w;
 let h;
 const gap = 130; // 130/200;

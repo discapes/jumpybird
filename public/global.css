@@ -558,10 +558,6 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
-.max-h-\[100vh\] {
-  max-height: 100vh;
-}
-
 .min-h-\[100vh\] {
   min-height: 100vh;
 }
