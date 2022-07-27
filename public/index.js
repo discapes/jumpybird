@@ -147,9 +147,9 @@ function MyApp() {
       }
 
       ctx.fillStyle = "white";
-      ctx.fillText(Math.floor(Math.max(0, score)), h / 800 * 100, h / 800 * 150);
+      ctx.fillText(Math.floor(Math.max(0, score * 14.12)) + " m", h / 800 * 100, h / 800 * 150);
       ctx.fillStyle = "black";
-      ctx.strokeText(Math.floor(Math.max(0, score)), h / 800 * 100, h / 800 * 150);
+      ctx.strokeText(Math.floor(Math.max(0, score * 14.12)) + " m", h / 800 * 100, h / 800 * 150);
       ctx.translate(x * propw, y);
       ctx.rotate(-vy / 10);
       img(birdimg, 0, 0, birdw, birdh);
@@ -164,6 +164,7 @@ function MyApp() {
 
   function onKeydown(e) {
     if (e.key === " ") {
+      e.preventDefault();
       tap();
     }
   }
