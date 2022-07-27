@@ -3,24 +3,22 @@
   "version": "1.0.0",
   "description": "Classic arcade game.",
   "scripts": {
-    "babel": "cross-env BABEL_ENV=production babel index.jsx -o public/build/index.js",
-    "tailwind": "tailwindcss -i ./styles.css -o ./public/global.css",
-    "build": "concurrently npm:babel npm:tailwind",
-    "watch-babel": "cross-env BABEL_ENV=production babel index.jsx -o public/index.js --watch",
-    "watch-tailwind": "tailwindcss -i ./styles.css -o ./public/global.css --watch",
-    "watch-reload": "livereload public",
     "start": "serve public",
-    "dev": "concurrently npm:watch-* npm:start"
+    "babel": "cross-env BABEL_ENV=production babel src -o public/build/bundle.js",
+    "cleancss": "cleancss -o public/build/styles.min.css src/*.css",
+    "build": "concurrently npm:babel npm:cleancss",
+    "watch-babel": "cross-env BABEL_ENV=production babel src -o public/build/bundle.js --watch",
+    "watch-cleancss": "cleancss -o public/build/styles.min.css src/*.css --watch",
+    "watch": "concurrently npm:watch-*"
   },
   "author": "Miika Tuominen",
   "devDependencies": {
     "@babel/cli": "^7.18.6",
     "@babel/core": "^7.18.6",
-    "@babel/preset-react": "^7.18.6",
+    "babel-preset-minify": "^0.5.2",
+    "clean-css-cli": "^5.6.1",
     "concurrently": "^7.2.2",
     "cross-env": "^7.0.3",
-    "livereload": "^0.9.3",
-    "serve": ">=13.0.4",
-    "tailwindcss": "^3.1.4"
+    "serve": ">=13.0.4"
   }
 }
