@@ -153,6 +153,7 @@ function MyApp() {
 
 	function onKeydown(e) {
 		if (e.key === " ") {
+			e.preventDefault();
 			tap();
 		}
 	}
