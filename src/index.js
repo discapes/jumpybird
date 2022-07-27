@@ -37,6 +37,10 @@ class RemovableListener {
 	}
 }
 
+if ("serviceWorker" in navigator) {
+	navigator.serviceWorker.register('./sw.js');
+};
+
 function newGame() {
 	let w = canvas.parentElement.clientWidth;
 	let h = canvas.parentElement.clientHeight;
@@ -161,7 +165,7 @@ function newGame() {
 		if (gameOverDate && y * scale > h) {
 			clearInterval(frameInterval);
 			allowRestart = true;
-		} 
+		}
 		return;
 
 		function img(i, x, y, w, h) {
