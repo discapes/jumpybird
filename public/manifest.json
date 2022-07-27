@@ -1,8 +1,10 @@
 {
 	"name": "Jumpy Bird",
+	"short_name": "Jumpy",
 	"theme_color": "#ffffff",
 	"background_color": "#004740",
 	"display": "fullscreen",
+	"orientation": "any",
 	"start_url": "/index.html",
 	"icons": [
 		{
@@ -93,5 +95,29 @@
 			"type": "image/png",
 			"purpose": "maskable"
 		}
-	]
+	],
+	"screenshots": [
+		{
+			"src": "https://i.imgur.com/tmBM3C2.jpg",
+			"sizes": "1080x2231",
+			"type": "image/jpg",
+			"platform": "narrow",
+			"label": "Potrait mode"
+		},
+		{
+			"src": "https://i.imgur.com/fvWeclw.jpg",
+			"sizes": "2400x1080",
+			"type": "image/jpg",
+			"platform": "wide",
+			"label": "Landscape mode"
+		},
+		{
+			"src": "https://i.imgur.com/3j9bal1.jpg",
+			"sizes": "1080x2400",
+			"type": "image/jpg",
+			"platform": "narrow",
+			"label": "Splash screen"
+		}
+	],
+	"categories": ["games", "kids", "entertainment"]
 }
