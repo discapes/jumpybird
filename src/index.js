@@ -1,11 +1,23 @@
+if ("serviceWorker" in navigator) {
+	await navigator.serviceWorker.register('/sw.js');
+	await navigator.serviceWorker.ready;
+}
+console.log("ready");
+
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 
 const imagePromises = [];
 function imageElement(src) {
 	const img = new Image();
-	imagePromises.push(new Promise(res => img.onload = res));
-	img.src = src;
+	imagePromises.push(new Promise(res => img.onload = () => {
+		console.log("loaded");
+		res();
+	}));
+	setTimeout(() => {
+		console.log("loading img " + src);
+		img.src = src
+	}, 0); // for some reason this is needed so the serviceworker caches on first load
 	return img;
 }
 
@@ -18,8 +30,9 @@ const images = {
 
 let wingsoundIndex = 0;
 const wingSounds = 10;
+const baseWingSound = new Audio("https://www.myinstants.com/media/sounds/sfx_wing.mp3");
 const sounds = {
-	wing: Array(10).fill(0).map(f => new Audio("https://www.myinstants.com/media/sounds/sfx_wing.mp3")),
+	wing: Array(wingSounds).fill(0).map(f => baseWingSound.cloneNode()),
 	death: new Audio("https://www.myinstants.com/media/sounds/sfx_die.mp3"),
 };
 
@@ -36,10 +49,6 @@ class RemovableListener {
 		window.removeEventListener(this.type, this.listener, this.options);
 	}
 }
-
-if ("serviceWorker" in navigator) {
-	navigator.serviceWorker.register('./sw.js');
-};
 
 function newGame() {
 	let w = canvas.parentElement.clientWidth;
@@ -98,6 +107,7 @@ function newGame() {
 	let gameOverDate = false;
 	let grassoffset = 0;
 	let allowRestart = false;
+	let frameInterval;
 
 	// TODO put this in notes
 	const pipes = [...Array(npipes).keys()].map(i => ({
@@ -163,7 +173,7 @@ function newGame() {
 
 
 		if (gameOverDate && y * scale > h) {
-			clearInterval(frameInterval);
+			if (frameInterval) clearInterval(frameInterval);
 			allowRestart = true;
 		}
 		return;
@@ -212,7 +222,7 @@ function newGame() {
 	function restart() {
 		eventListeners.forEach(e => e.remove());
 		if (frameInterval) clearInterval(frameInterval);
-		newGame();
+		newGame();;
 	}
 }
 

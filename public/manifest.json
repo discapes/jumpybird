@@ -98,21 +98,21 @@
 	],
 	"screenshots": [
 		{
-			"src": "https://i.imgur.com/tmBM3C2.jpg",
+			"src": "/screenshots/tmBM3C2.jpg",
 			"sizes": "1080x2231",
 			"type": "image/jpg",
 			"platform": "narrow",
 			"label": "Potrait mode"
 		},
 		{
-			"src": "https://i.imgur.com/fvWeclw.jpg",
+			"src": "/screenshots/fvWeclw.jpg",
 			"sizes": "2400x1080",
 			"type": "image/jpg",
 			"platform": "wide",
 			"label": "Landscape mode"
 		},
 		{
-			"src": "https://i.imgur.com/3j9bal1.jpg",
+			"src": "/screenshots/3j9bal1.jpg",
 			"sizes": "1080x2400",
 			"type": "image/jpg",
 			"platform": "narrow",

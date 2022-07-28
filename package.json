@@ -5,7 +5,7 @@
   "scripts": {
     "start": "serve public",
     "babel": "cross-env BABEL_ENV=production babel src -o public/build/bundle.js",
-    "workbox": "workbox generateSW workbox-config.js",
+    "workbox": "rm -f public/workbox-*.js && workbox generateSW workbox-config.js",
     "cleancss": "cleancss -o public/build/styles.min.css src/*.css",
     "build": "concurrently npm:babel npm:cleancss npm:workbox",
     "watch-babel": "cross-env BABEL_ENV=development babel src -o public/build/bundle.js --watch",
