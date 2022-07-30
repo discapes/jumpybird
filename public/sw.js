@@ -161,6 +161,7 @@ define(['./workbox-5a491d68'], (function (workbox) { 'use strict';
   }], {
     "ignoreURLParametersMatching": []
   });
+  console.log("precached");
   workbox.registerRoute(({
     url
   }) => true, new workbox.CacheFirst({
@@ -168,5 +169,5 @@ define(['./workbox-5a491d68'], (function (workbox) { 'use strict';
       statuses: [0, 200]
     })]
   }), 'GET');
-
+  console.log("registered");
 }));

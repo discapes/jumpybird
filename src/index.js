@@ -1,6 +1,27 @@
 if ("serviceWorker" in navigator) {
-	await navigator.serviceWorker.register('/sw.js');
-	await navigator.serviceWorker.ready;
+	navigator.serviceWorker.register('/sw.js').then(reg => {
+		console.log("installing: " + reg.installing); // the installing worker, or undefined
+		console.log("waiting: " + reg.waiting); // the waiting worker, or undefined
+		console.log("active: " + reg.active); // the active worker, or undefined
+
+		reg.addEventListener('updatefound', () => {
+			// A wild service worker has appeared in reg.installing!
+			const newWorker = reg.installing;
+
+			console.log("state: " + newWorker.state);
+			// "installing" - the install event has fired, but not yet complete
+			// "installed"  - install complete
+			// "activating" - the activate event has fired, but not yet complete
+			// "activated"  - fully active
+			// "redundant"  - discarded. Either failed install, or it's been
+			//                replaced by a newer version
+
+			newWorker.addEventListener('statechange', () => {
+				// newWorker.state has changed
+				console.log("new state: " + newWorker.state);
+			});
+		});
+	});
 }
 console.log("ready");
 
