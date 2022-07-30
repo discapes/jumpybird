@@ -1,13 +1,15 @@
 const delay = del => new Promise(res => setTimeout(res, del));
-// todo typescript
+// todo typescript, minify this
 
 // put things here because they need revisioning,
 // or that are needed offline but not loaded immediately
+// or that are loaded by css or other things before sw activate
 const requiredOffline = new Map([...Object.entries({
 	'/': { rev: 24, alreadyFetching: false },
-	'/assets/bg.png': { rev: 15, alreadyFetching: false },
-	'/favicon.ico': { rev: 6, alreadyFetching: false },
-	'/build/bundle.js': { rev: 4, alreadyFetching: false },
+	'/assets/bg.png': { rev: 1, alreadyFetching: false },
+	'/favicon.ico': { rev: 1, alreadyFetching: false },
+	'/build/styles.min.css': { rev: 1, alreadyFetching: false },
+	'/build/bundle.js': { rev: 3, alreadyFetching: false },
 })].map(([k, v]) => [new URL(k, location.href).href, v]));
 
 const APPCACHENAME = 'appcache';
@@ -29,7 +31,7 @@ function addParams(urlStr, k, v) {
 	return url.href;
 }
 
-async function loadStaticCache() {
+async function loadAppCache() {
 	console.log('caching offline-required and revisioned files');
 	const appcache = await caches.open(APPCACHENAME);
 	const alreadyInCache = (await appcache.keys()).map(req => req.url);
@@ -38,17 +40,17 @@ async function loadStaticCache() {
 	for (let [url, { rev, alreadyFetching }] of requiredOffline.entries()) {
 		if (rev) url = addParams(url, '__rev__', rev);
 		if (!alreadyInCache.includes(url) && !alreadyFetching) {
-			console.log(`(bg) adding ${url} to static cache`);
+			console.log(`(bg) ${APPCACHENAME} added ${url}`);
 			fetch(url, { mode: 'no-cors' }).then(res => appcache.put(url, res))
 		} else {
-			console.log(`(bg) ${url} is already ${APPCACHENAME}`);
+			console.log(`(bg) ${APPCACHENAME} hit for ${url}`);
 		}
 		expectedCacheKeys.push(url);
 	}
 	alreadyInCache.filter(url => !expectedCacheKeys.includes(url))
-		.forEach(url => {
-			console.log(`removing old static cache entry ${url}`);
+		.forEach(url => {;
 			appcache.delete(url);
+			console.log(`${APPCACHENAME} removed ${url}`)
 		})
 }
 

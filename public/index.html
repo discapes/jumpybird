@@ -5,7 +5,7 @@
 <head>
 	<script type="module">
 		if ('serviceWorker' in navigator) {
-			const reg = await navigator.serviceWorker.register('./sw.js');
+			const reg = await navigator.serviceWorker.register('./sw.js', { scope: '/' });
 			if (reg.active) reg.onupdatefound = e => {
 				const worker = reg.installing;
 				worker.onstatechange = async () => {
