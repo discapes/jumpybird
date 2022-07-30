@@ -774,6 +774,7 @@ define(['exports'], (function (exports) { 'use strict';
 
 
       addFetchListener() {
+        console.log("addfetchlistener")
         // See https://github.com/Microsoft/TypeScript/issues/28357#issuecomment-436484705
         self.addEventListener('fetch', event => {
           const {

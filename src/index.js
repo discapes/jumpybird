@@ -1,44 +1,11 @@
-if ("serviceWorker" in navigator) {
-	navigator.serviceWorker.register('/sw.js').then(reg => {
-		console.log("installing: " + reg.installing); // the installing worker, or undefined
-		console.log("waiting: " + reg.waiting); // the waiting worker, or undefined
-		console.log("active: " + reg.active); // the active worker, or undefined
-
-		reg.addEventListener('updatefound', () => {
-			// A wild service worker has appeared in reg.installing!
-			const newWorker = reg.installing;
-
-			console.log("state: " + newWorker.state);
-			// "installing" - the install event has fired, but not yet complete
-			// "installed"  - install complete
-			// "activating" - the activate event has fired, but not yet complete
-			// "activated"  - fully active
-			// "redundant"  - discarded. Either failed install, or it's been
-			//                replaced by a newer version
-
-			newWorker.addEventListener('statechange', () => {
-				// newWorker.state has changed
-				console.log("new state: " + newWorker.state);
-			});
-		});
-	});
-}
-console.log("ready");
-
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 
 const imagePromises = [];
 function imageElement(src) {
 	const img = new Image();
-	imagePromises.push(new Promise(res => img.onload = () => {
-		console.log("loaded");
-		res();
-	}));
-	setTimeout(() => {
-		console.log("loading img " + src);
-		img.src = src
-	}, 0); // for some reason this is needed so the serviceworker caches on first load
+	imagePromises.push(new Promise(res => img.onload = res));
+	img.src = src;
 	return img;
 }
 

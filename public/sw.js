@@ -89,6 +89,17 @@ define(['./workbox-5a491d68'], (function (workbox) { 'use strict';
    * See https://goo.gl/S9QRab
    */
 
+
+  workbox.registerRoute(({
+    url
+  }) => true, new workbox.CacheFirst({
+    plugins: [new workbox.CacheableResponsePlugin({
+      statuses: [0, 200]
+    })]
+  }), 'GET');
+  // console.log("registered");;;;
+  //postMessage(listenersadded);;
+
   workbox.precacheAndRoute([{
     "url": "assets/bg.png",
     "revision": "db5e73210dfcdd31ac711c35da31005d"
@@ -161,13 +172,4 @@ define(['./workbox-5a491d68'], (function (workbox) { 'use strict';
   }], {
     "ignoreURLParametersMatching": []
   });
-  console.log("precached");
-  workbox.registerRoute(({
-    url
-  }) => true, new workbox.CacheFirst({
-    plugins: [new workbox.CacheableResponsePlugin({
-      statuses: [0, 200]
-    })]
-  }), 'GET');
-  console.log("registered");
 }));
