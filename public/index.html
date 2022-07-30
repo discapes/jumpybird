@@ -5,8 +5,8 @@
 <head>
 	<script type="module">
 		if ('serviceWorker' in navigator) {
-			const reg = await navigator.serviceWorker.register('./swo.js');
-			reg.onupdatefound = e => {
+			const reg = await navigator.serviceWorker.register('./sw.js');
+			if (reg.active) reg.onupdatefound = e => {
 				const worker = reg.installing;
 				worker.onstatechange = async () => {
 					if (worker.state === "activated") {
@@ -14,7 +14,7 @@
 						window.location.reload();
 					}
 				};
-			} 
+			}
 		}
 	</script>
 

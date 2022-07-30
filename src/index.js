@@ -1,3 +1,7 @@
+await navigator.serviceWorker.ready;
+// even if we wait for serviceworker.ready, we still need to load images in a timeout 0
+// for some reason;
+
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -5,7 +9,7 @@ const imagePromises = [];
 function imageElement(src) {
 	const img = new Image();
 	imagePromises.push(new Promise(res => img.onload = res));
-	img.src = src;
+	setTimeout(() => img.src = src, 0);
 	return img;
 }
 
@@ -17,7 +21,7 @@ const images = {
 };
 
 let wingsoundIndex = 0;
-const wingSounds = 10;
+const wingSounds = 5;
 const baseWingSound = new Audio("https://www.myinstants.com/media/sounds/sfx_wing.mp3");
 const sounds = {
 	wing: Array(wingSounds).fill(0).map(f => baseWingSound.cloneNode()),
