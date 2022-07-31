@@ -1,16 +1,9 @@
 const delay = del => new Promise(res => setTimeout(res, del));
-// todo typescript, minify this
 
-// put things here because they need revisioning,
-// or that are needed offline but not loaded immediately
-// or that are loaded by css or other things before sw activate
-const requiredOffline = new Map([...Object.entries({
-	'/': { rev: 2, alreadyFetching: false },
-	'/assets/bg.png': { rev: 1, alreadyFetching: false },
-	'/favicon.ico': { rev: 1, alreadyFetching: false },
-	'/build/styles.min.css': { rev: 1, alreadyFetching: false },
-	'/build/bundle.js': { rev: 5, alreadyFetching: false },
-})].map(([k, v]) => [new URL(k, location.href).href, v]));
+// these things are revisioned, and are loaded for offline use
+const requiredOffline = new Map(__MANIFEST__.map(([ pathname, rev]) =>
+	[location.origin + pathname, { rev, alreadyFetching: false }]
+));
 
 const APPCACHENAME = 'appcache';
 const RUNTIMECACHE = 'runtimecache';
@@ -18,7 +11,7 @@ const RUNTIMECACHE = 'runtimecache';
 self.addEventListener('install', e => {
 	console.log('sw: installing');
 	self.skipWaiting();
-	loadAppCache(self.__WB_MANIFEST);
+	loadAppCache();
 })
 self.addEventListener('activate', () => {
 	console.log('sw: activating');
@@ -48,7 +41,8 @@ async function loadAppCache() {
 		expectedCacheKeys.push(url);
 	}
 	alreadyInCache.filter(url => !expectedCacheKeys.includes(url))
-		.forEach(url => {;
+		.forEach(url => {
+			;
 			appcache.delete(url);
 			console.log(`${APPCACHENAME} removed ${url}`)
 		})
