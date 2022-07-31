@@ -5,11 +5,11 @@ const delay = del => new Promise(res => setTimeout(res, del));
 // or that are needed offline but not loaded immediately
 // or that are loaded by css or other things before sw activate
 const requiredOffline = new Map([...Object.entries({
-	'/': { rev: 24, alreadyFetching: false },
+	'/': { rev: 2, alreadyFetching: false },
 	'/assets/bg.png': { rev: 1, alreadyFetching: false },
 	'/favicon.ico': { rev: 1, alreadyFetching: false },
 	'/build/styles.min.css': { rev: 1, alreadyFetching: false },
-	'/build/bundle.js': { rev: 3, alreadyFetching: false },
+	'/build/bundle.js': { rev: 5, alreadyFetching: false },
 })].map(([k, v]) => [new URL(k, location.href).href, v]));
 
 const APPCACHENAME = 'appcache';
@@ -18,10 +18,10 @@ const RUNTIMECACHE = 'runtimecache';
 self.addEventListener('install', e => {
 	console.log('sw: installing');
 	self.skipWaiting();
-	loadStaticCache(self.__WB_MANIFEST);
+	loadAppCache(self.__WB_MANIFEST);
 })
 self.addEventListener('activate', () => {
-	console.log('sw: active');
+	console.log('sw: activating');
 	self.clients.claim();
 });
 

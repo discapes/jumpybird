@@ -5,18 +5,20 @@
   "scripts": {
     "start": "serve public",
     "babel": "cross-env BABEL_ENV=production babel src/index.js -o public/build/bundle.js",
-    "workbox": "workbox injectManifest workbox-config.js",
+    "workbox": "workbox injectManifest workbox-config.js && cross-env BABEL_ENV=production babel public/sw.js -o public/sw.js",
     "cleancss": "cleancss -o public/build/styles.min.css src/*.css",
     "build": "concurrently npm:babel npm:cleancss npm:workbox",
     "watch-babel": "cross-env BABEL_ENV=development babel src/index.js -o public/build/bundle.js --watch",
     "watch-cleancss": "cleancss --format beautify -o public/build/styles.min.css src/*.css --watch",
-    "watch": "concurrently npm:watch-*"
+    "watch-workbox": "chokidar src/sw.js -c \"workbox injectManifest workbox-config.js\"",
+    "dev": "concurrently npm:watch-* npm:start"
   },
   "author": "Miika Tuominen",
   "devDependencies": {
     "@babel/cli": ">=7.18.9",
     "@babel/core": ">=7.18.9",
     "babel-preset-minify": ">=0.5.2",
+    "chokidar-cli": "^3.0.0",
     "clean-css-cli": ">=5.6.1",
     "concurrently": ">=7.3.0",
     "cross-env": ">=7.0.3",

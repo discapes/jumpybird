@@ -1,4 +1,5 @@
 await navigator.serviceWorker.ready;
+console.log(`serviceworker ready`);
 // even if we wait for serviceworker.ready, we still need to load images in a timeout 0
 // for some reason;
 
