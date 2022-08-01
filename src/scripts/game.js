@@ -1,7 +1,4 @@
-await navigator.serviceWorker.ready;
-console.log(`serviceworker ready`);
-// even if we wait for serviceworker.ready, we still need to load images in a timeout 0
-// for some reason;
+import { RemovableListener } from "./util.js";
 
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
@@ -10,6 +7,8 @@ const imagePromises = [];
 function imageElement(src) {
 	const img = new Image();
 	imagePromises.push(new Promise(res => img.onload = res));
+	// even if we wait for serviceworker.ready, we still need to load images in a timeout 0
+	// for some reason;
 	setTimeout(() => img.src = src, 0);
 	return img;
 }
@@ -28,20 +27,6 @@ const sounds = {
 	wing: Array(wingSounds).fill(0).map(f => baseWingSound.cloneNode()),
 	death: new Audio("https://www.myinstants.com/media/sounds/sfx_die.mp3"),
 };
-
-class RemovableListener {
-	constructor(type, listener, options) {
-		this.type = type;
-		this.listener = listener;
-		this.options = options;
-	}
-	add() {
-		window.addEventListener(this.type, this.listener, this.options);
-	}
-	remove() {
-		window.removeEventListener(this.type, this.listener, this.options);
-	}
-}
 
 function newGame() {
 	let w = canvas.parentElement.clientWidth;
@@ -215,7 +200,7 @@ function newGame() {
 	function restart() {
 		eventListeners.forEach(e => e.remove());
 		if (frameInterval) clearInterval(frameInterval);
-		newGame();;
+		newGame();
 	}
 }
 

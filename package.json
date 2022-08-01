@@ -2,6 +2,7 @@
   "name": "jumpybird",
   "version": "1.0.0",
   "description": "Classic arcade game.",
+  "type": "module",
   "scripts": {
     "start": "node tasks.mjs start",
     "dev": "node tasks.mjs dev",
@@ -13,7 +14,6 @@
     "babel-preset-minify": ">=0.5.2",
     "chokidar": "^3.5.3",
     "clean-css": "^5.3.1",
-    "concurrently": ">=7.3.0",
     "glob": "^8.0.3",
     "serve": ">=14.0.1"
   }

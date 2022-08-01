@@ -1,0 +1,32 @@
+.screenheight {
+	min-height: 100vh;
+	height: 100vh;
+}
+
+.background {
+	background-image: url("/assets/bg.png");
+	background-size: cover;
+	background-position: bottom;
+}
+
+.dialog {
+	position: fixed;
+	/* width: 200px; */
+	/* left: 50%; */
+	/* top: 80%; */
+	padding: 10px;
+	background-color: rgba(0, 0, 0, 0.5);
+	color: white;
+	text-align: center;
+	/* transform: translate(-50%, -50%); */
+}
+
+@keyframes fade-out {
+	0% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}

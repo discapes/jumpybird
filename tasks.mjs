@@ -1,71 +1,113 @@
 import { spawn } from "child_process";
 import { watch as chokidarWatch } from "chokidar";
 import CleanCSS from "clean-css";
-import { copyFile, readFile, writeFile, open } from "fs/promises";
+import { copyFile, readFile, writeFile } from "fs/promises";
 import { transformFileAsync } from "@babel/core";
 import globAsync from "glob";
 import { createHash } from "crypto";
 import { promisify } from "util";
 import { createReadStream } from "fs";
+import { basename, dirname } from "path";
 const glob = promisify(globAsync);
 
 const cssDest = 'public/build/styles.min.css';
 const cssSrc = 'src/*.css';
-const jsSrc = 'src/index.js';
-const jsDest = 'public/build/bundle.js';
+
+const jsSrc = 'src/scripts/*.js';
+const jsDestDir = 'public/build';
+
 const swSrc = 'src/sw.js';
 const swDest = 'public/sw.js';
 
-const actions = {
-	dev(log) {
-		watch(logTask(`css-watch`), cssSrc,
-			async files => writeFile(cssDest, await cat(...files)));
-		watch(logTask(`js-watch`), jsSrc, () => copyFile(jsSrc, jsDest));
-		watch(logTask(`injectmanifest-watch`)
-		, ['public/', swSrc], () => this.injectmanifest(logTask(`injectmanifest`))
-		, { ignored: swDest, ignoreInitial: true });
-		this.injectmanifest(logTask(`injectmanifest`))
-		this.start(logTask(`start (dev)`));
+const versionDest = 'public/version';
+const dontCache = [swDest, versionDest];
+
+const tasks = {
+	dev() {
+		const log = getLogger(this.dev.name);
+
+		watch(getLogger(`css-watch`), cssSrc, async (files, file, log) => {
+			await writeFile(cssDest, await cat(...files));
+			log(`concatenated ${files} to ${cssDest}`);
+		});
+
+		watch(getLogger(`js-watch`), jsSrc, async (files, file, log) => {
+			await copyFile(file, `${jsDestDir}/${basename(file)}`)
+			log(`copied ${file} to ${jsDestDir}/${basename(file)}`);
+		});
+
+		watch(getLogger(`injectmanifest-watch`), ['public/', swSrc], () =>
+			this.injectmanifest(getLogger(`injectmanifest`))
+			, { ignored: dontCache, ignoreInitial: true });
+
+		this.injectmanifest(getLogger(`injectmanifest`));
+		this.start(getLogger(`start (dev)`));
 	},
-	async build(log) {
+	async build() {
+		const log = getLogger(this.build.name);
+
 		await Promise.all([
-			this.cleancss(logTask('cleancss')), this.minify(logTask('babel')),
+			this.cleancss(), this.minify(),
 		]);
-		await this.injectmanifest(logTask('injectmanifest'));
-		await this.minify(logTask('minify (sw)'), swDest, swDest);
+		await this.injectmanifest();
+		await this.minify([swDest], dirname(swDest));
 	},
-	start(log) {
-		run('node node_modules/serve/build/main.js public', log)
+	start() {
+		const log = getLogger(this.start.name);
+		run('node node_modules/serve/build/main.js public', log);
 		// why cant we npx here??
 	},
 
-	async cleancss(log) {
+	async cleancss() {
+		const log = getLogger(this.cleancss.name);
 		const files = await glob(cssSrc);
 		const minified = new CleanCSS().minify(files);
 		await writeFile(cssDest, minified.styles);
 		log(`minified ${files} and wrote to ${cssDest}`);
 	},
-	async minify(log, src = jsSrc, dest = jsDest) {
+
+	async minify(sources, destDir = jsDestDir) {
+		if (!sources) sources = await glob(jsSrc);
+		const log = getLogger(this.minify.name);
 		const babelConfig = JSON.parse((await readFile('.babelrc')).toString());
-		const output = await transformFileAsync(src, babelConfig);
-		await writeFile(dest, output.code);
-		log(`transformed ${src} and wrote to ${dest}`);
+
+		sources.forEach(async src => {
+			const output = await transformFileAsync(src, babelConfig);
+			await writeFile(`${destDir}/${basename(src)}`, output.code);
+			log(`transformed ${src} and wrote to ${destDir}`);
+		});
 	},
-	async injectmanifest(log) {
+
+	async injectmanifest() {
+		const log = getLogger(this.injectmanifest.name);
+
 		const pathnames = await glob('**/*', { cwd: 'public', nodir: true });
 		const revmap = (await Promise.all(pathnames.map(async f => {
-			if (`public/${f}` === swDest) return undefined;
-			const hash = await getHash(`public/${f}`)
+			if (dontCache.find(dc => dc === `public/${f}`)) return undefined;
+			const hash = await getFileHash(`public/${f}`)
 			return [f === 'index.html' ? '/' : '/' + f, hash.slice(0, 10)];
 		}))).filter(s => s != undefined);
+
 		const sw = (await readFile(swSrc)).toString();
-		const newsw = sw.replace('__MANIFEST__', JSON.stringify(revmap));
+		let newsw = sw.replace('__MANIFEST__', JSON.stringify(revmap));
+
+		const version = getHash(newsw).slice(0, 10);
+		newsw = newsw.replace('__VERSION__', JSON.stringify(version));
 		await writeFile(swDest, newsw);
 		log(`added ${revmap.length} entries to ${swSrc} and wrote to ${swDest}`);
+
+		await writeFile(versionDest, version);
+		log(`wrote sw version ${version} to ${versionDest}`)
 	},
+
+	async clean() {
+		const log = getLogger(this.clean.name);
+		log(`TODO`);
+		const toBeDeleted = [swSrc, jsDestDir, cssDest, versionDest];
+	}
 }
 
-function getHash(filename) {
+function getFileHash(filename) {
 	return new Promise((resolve) => {
 		let hash = createHash('sha1')
 		const input = createReadStream(filename);
@@ -77,8 +119,13 @@ function getHash(filename) {
 	});
 }
 
-function logTask(task) {
-	// console.log(`[[${task}]]`)
+function getHash(str) {
+	let hash = createHash('sha1');
+	hash.update(str);
+	return hash.digest('hex');
+}
+
+function getLogger(task) {
 	return msg => console.log(`[${task}] ${msg}`);
 }
 
@@ -86,10 +133,9 @@ async function watch(log, patterns, onchange, options) {
 	if (!Array.isArray(patterns)) patterns = [patterns];
 	log(`watching ${patterns}`);
 	const files = (await Promise.all(patterns.map(p => glob(p)))).flat();
-	chokidarWatch(files, options).on('all', (e, path) => {
-		log(`change in ${path}`);
-		onchange(files)
-	});
+	chokidarWatch(files, options).on('all', (e, path) =>
+		onchange(files, path, log)
+	);
 }
 
 async function cat(...args) {
@@ -112,10 +158,10 @@ function run(cmd, log) {
 }
 
 const args = process.argv.slice(2);
-const action = args[0];
-if (!action) console.error(`No action specified. Available actions: ${Object.keys(actions)}`);
-else if (!(action in actions)) console.error(`${action} is not a valid action. Available actions: ${Object.keys(actions)}`);
+const task = args[0];
+if (!task) console.error(`No task specified. Available task: ${Object.keys(tasks)}`);
+else if (!(task in tasks)) console.error(`${task} is not a valid tasks. Available tasks: ${Object.keys(tasks)}`);
 else {
-	console.log(`[[${action}]]`)
-	actions[action](logTask(action));
+	console.log(`[[${task}]]`)
+	tasks[task]();
 }
