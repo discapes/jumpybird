@@ -66,7 +66,7 @@ function newGame() {
 	const birdh = 3;
 	const birdw = 6.5;
 	const grassy = 85;
-	const xgap = 17;
+	const xgap = 20;
 	const pipew = 10;
 	const pipeh = 30;
 	const g = 300;
@@ -164,7 +164,7 @@ function newGame() {
 			pipe.x -= (timeDelta * speed);
 			pipe.x += Math.sin(pipe.dir) * (timeDelta * 10);
 			pipe.y += Math.cos(pipe.dir) * (timeDelta * 10);
-			pipe.dir += (pipe.cw * 2 - 1) * Math.random() * 0.1 * (timeDelta / 0.015);
+			pipe.dir += (pipe.cw * 2 - 1) * Math.random() * timeDelta * 10;
 
 			if (pipe.x < -pipew) {
 				pipe.x = (npipes - 1) * (pipew + xgap) + (xgap);

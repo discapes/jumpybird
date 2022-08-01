@@ -1,4 +1,5 @@
 import { dialog } from './util.js';
+import news from './news.js';
 
 // todo theres gotta be a better __filename
 const silentlog = msg => void console.log(`${'index'}: ${msg}`);
@@ -25,6 +26,7 @@ function update(reg) {
 			const cv = localStorage.getItem('version');
 			if (cv == nv) {
 				log(`Up to date!`);
+				setTimeout(readNews, 100);
 				resolve();
 			}
 			else {
@@ -40,11 +42,26 @@ function update(reg) {
 			worker.onstatechange = async () => {
 				if (worker.state === "activated")
 					newVersion.then(async nv => {
-						console.log(`updated! reloading...`);
+						silentlog(`updated! reloading...`);
 						localStorage.setItem('version', nv);
 						window.location.reload();
 					});
 			};
 		}
 	});
+}
+
+function readNews() {
+	let newsRead = localStorage.getItem('newsread') || 0;
+	news.slice(newsRead, news.length).forEach(item => {
+		if (item.v) {
+			alert(`What's new in ${item.v}:
+
+${item.text}`);
+		} else {
+			alert(item.text);;
+		} 
+		newsRead++;
+		localStorage.setItem('newsread', newsRead);
+	})
 }

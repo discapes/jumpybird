@@ -55,7 +55,7 @@ const tasks = {
 	start() {
 		const log = getLogger(this.start.name);
 		run('node node_modules/serve/build/main.js public', log);
-		// why cant we npx here??
+		// todo why cant we npx here??
 	},
 
 	async cleancss() {
