@@ -1,5 +1,4 @@
-const log = msg => console.log(`${'sw'}: ${msg}`);
-// todo theres gotta be a better __filename
+const log = msg => console.log(`${location.href.slice(location.href.indexOf('/') + 1)}: ${msg}`);
 const delay = del => new Promise(res => setTimeout(res, del));
 
 // these things are revisioned, and are loaded for offline use

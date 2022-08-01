@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import { watch as chokidarWatch } from "chokidar";
 import CleanCSS from "clean-css";
-import { copyFile, readFile, writeFile } from "fs/promises";
+import { copyFile, readFile, unlink, writeFile } from "fs/promises";
 import { transformFileAsync } from "@babel/core";
 import globAsync from "glob";
 import { createHash } from "crypto";
@@ -10,16 +10,17 @@ import { createReadStream } from "fs";
 import { basename, dirname } from "path";
 const glob = promisify(globAsync);
 
-const cssDest = 'public/build/styles.min.css';
+
 const cssSrc = 'src/*.css';
-
 const jsSrc = 'src/scripts/*.js';
-const jsDestDir = 'public/build';
-
 const swSrc = 'src/sw.js';
-const swDest = 'public/sw.js';
 
+const cssDest = 'public/build/styles.min.css';
+const swDest = 'public/sw.js';
+const jsDestDir = 'public/build';
 const versionDest = 'public/version';
+
+const cleanpaths = ['public/build/*', swDest, versionDest]
 const dontCache = [swDest, versionDest];
 
 const tasks = {
@@ -45,6 +46,7 @@ const tasks = {
 	},
 	async build() {
 		const log = getLogger(this.build.name);
+		await this.clean();
 
 		await Promise.all([
 			this.cleancss(), this.minify(),
@@ -54,8 +56,7 @@ const tasks = {
 	},
 	start() {
 		const log = getLogger(this.start.name);
-		run('node node_modules/serve/build/main.js public', log);
-		// todo why cant we npx here??
+		run('npx serve public', log);
 	},
 
 	async cleancss() {
@@ -102,9 +103,17 @@ const tasks = {
 
 	async clean() {
 		const log = getLogger(this.clean.name);
-		log(`TODO`);
-		const toBeDeleted = [swSrc, jsDestDir, cssDest, versionDest];
+
+		await Promise.all(cleanpaths.map(async path => {
+			const files = await glob(path, {nodir: true});
+			await Promise.all(files.map(f => deleteFile(f, log)));
+		}));
 	}
+}
+
+async function deleteFile(f, log) {
+	await unlink(f);
+	log(`deleted ${f}`);
 }
 
 function getFileHash(filename) {
@@ -147,7 +156,7 @@ function run(cmd, log) {
 	const argv = cmd.split(' ');
 	log(`running: ${cmd}`);
 	const program = argv[0];
-	const proc = spawn(program, argv.slice(1));
+	const proc = spawn(program, argv.slice(1), { shell: true });
 	const handler = data => data.toString().split('\n').forEach(data => log(`(${program}) ${data}`));
 	proc.stdout.on('data', handler);
 	proc.stderr.on('data', handler);

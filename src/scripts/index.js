@@ -1,17 +1,17 @@
 import { dialog } from './util.js';
 import news from './news.js';
 
-// todo theres gotta be a better __filename
-const silentlog = msg => void console.log(`${'index'}: ${msg}`);
+const __filename = import.meta.url.slice(import.meta.url.lastIndexOf('/') + 1, import.meta.url.lastIndexOf('?'));
+const silentlog = msg => void console.log(`${__filename}: ${msg}`);
 const log = msg => silentlog(msg) || dialog(msg, 1, 1);
 const blocking = false;
 
 if ('serviceWorker' in navigator) {
 	const reg = await navigator.serviceWorker.register('./sw.js', { scope: '/' });
-	if (reg.active) 
+	if (reg.active)
 		if (blocking) await update(reg);
 		else update(reg);
-	
+
 	await navigator.serviceWorker.ready;
 	silentlog(`serviceworker ready`);
 	import('./game.js');
@@ -60,7 +60,7 @@ function readNews() {
 ${item.text}`);
 		} else {
 			alert(item.text);;
-		} 
+		}
 		newsRead++;
 		localStorage.setItem('newsread', newsRead);
 	})
