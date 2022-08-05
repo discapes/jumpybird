@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node tasks.mjs start",
     "dev": "node tasks.mjs dev",
-    "build": "node tasks.mjs build"
+    "build": "node tasks.mjs build",
+    "clean": "node tasks.mjs clean"
   },
   "author": "Miika Tuominen",
   "devDependencies": {

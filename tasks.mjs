@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import { watch as chokidarWatch } from "chokidar";
 import CleanCSS from "clean-css";
-import { copyFile, readFile, unlink, writeFile } from "fs/promises";
+import { copyFile, readFile, mkdir, writeFile, rm } from "fs/promises";
 import { transformFileAsync } from "@babel/core";
 import globAsync from "glob";
 import { createHash } from "crypto";
@@ -19,13 +19,15 @@ const cssDest = 'public/build/styles.min.css';
 const swDest = 'public/sw.js';
 const jsDestDir = 'public/build';
 const versionDest = 'public/version';
+const createDirs = ['public/build'];
 
-const cleanpaths = ['public/build/*', swDest, versionDest]
+const cleanFiles = ['public/build/', swDest, versionDest]
 const dontCache = [swDest, versionDest];
 
 const tasks = {
-	dev() {
+	async dev() {
 		const log = getLogger(this.dev.name);
+		await Promise.all(createDirs.map(d => mkdir(d)));
 
 		watch(getLogger(`css-watch`), cssSrc, async (files, file, log) => {
 			await writeFile(cssDest, await cat(...files));
@@ -47,6 +49,7 @@ const tasks = {
 	async build() {
 		const log = getLogger(this.build.name);
 		await this.clean();
+		await Promise.all(createDirs.map(d => mkdir(d)));
 
 		await Promise.all([
 			this.cleancss(), this.minify(),
@@ -103,17 +106,16 @@ const tasks = {
 
 	async clean() {
 		const log = getLogger(this.clean.name);
+		log(`cleaned ${cleanFiles}`);
 
-		await Promise.all(cleanpaths.map(async path => {
-			const files = await glob(path, {nodir: true});
-			await Promise.all(files.map(f => deleteFile(f, log)));
-		}));
+		await Promise.all(cleanFiles.map(async file =>
+			remove(file, log)
+		));
 	}
 }
 
-async function deleteFile(f, log) {
-	await unlink(f);
-	log(`deleted ${f}`);
+async function remove(f, log) {
+	await rm(f, { force: true, recursive: true});
 }
 
 function getFileHash(filename) {
@@ -171,6 +173,5 @@ const task = args[0];
 if (!task) console.error(`No task specified. Available task: ${Object.keys(tasks)}`);
 else if (!(task in tasks)) console.error(`${task} is not a valid tasks. Available tasks: ${Object.keys(tasks)}`);
 else {
-	console.log(`[[${task}]]`)
 	tasks[task]();
 }
