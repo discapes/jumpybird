@@ -1,67 +1,50 @@
-import { dialog } from './util.js';
-import news from './news.js';
+import { dialog } from "./util.js";
 
-const __filename = import.meta.url.slice(import.meta.url.lastIndexOf('/') + 1, import.meta.url.lastIndexOf('?'));
-const silentlog = msg => void console.log(`${__filename}: ${msg}`);
-const log = msg => silentlog(msg) || dialog(msg, 1, 1);
-const blocking = false;
+const __filename = import.meta.url.slice(import.meta.url.lastIndexOf("/") + 1);
+const silentlog = (msg) => void console.log(`${__filename}: ${msg}`);
+const log = (msg) => silentlog(msg) || dialog(msg, 1, 1);
 
-if ('serviceWorker' in navigator) {
-	const reg = await navigator.serviceWorker.register('./sw.js', { scope: '/' });
-	if (reg.active)
-		if (blocking) await update(reg);
-		else update(reg);
-
-	await navigator.serviceWorker.ready;
-	silentlog(`serviceworker ready`);
-	import('./game.js');
+function invokeSWUpdateFlow(registration) {
+  if (registration.waiting) {
+    registration.waiting.postMessage("SKIP_WAITING");
+  }
+  fetch("changelog.json")
+    .then((res) => res.json())
+    .then((changelog) => {
+      let newsRead = localStorage.getItem("newsread") || 0;
+      changelog.slice(newsRead, changelog.length).forEach(alert);
+      localStorage.setItem("newsread", changelog.length);
+    });
+  alert("New version of the app is available.");
 }
 
-function update(reg) {
-	return new Promise((resolve, reject) => {
-		silentlog(`Checking for updates...`);
-		let newVersion = fetch('/version').then(v => v.text());
-		newVersion.then(nv => {
-			if (!nv) return;
-			const cv = localStorage.getItem('version');
-			if (cv == nv) {
-				log(`Up to date!`);
-				setTimeout(readNews, 100);
-				resolve();
-			}
-			else {
-				log(`New version available, reloading...`);
-			}
-		}).catch(e => {
-			log(`Couldn't connect.`);
-			resolve();
-		});
+if ("serviceWorker" in navigator) {
+  const reg = await navigator.serviceWorker.register("./sw.js", { scope: "/" });
 
-		reg.onupdatefound = e => {
-			const worker = reg.installing;
-			worker.onstatechange = async () => {
-				if (worker.state === "activated")
-					newVersion.then(async nv => {
-						silentlog(`updated! reloading...`);
-						localStorage.setItem('version', nv);
-						window.location.reload();
-					});
-			};
-		}
-	});
-}
+  if (reg.waiting) {
+    invokeServiceWorkerUpdateFlow(reg);
+  }
 
-function readNews() {
-	let newsRead = localStorage.getItem('newsread') || 0;
-	news.slice(newsRead, news.length).forEach(item => {
-		if (item.v) {
-			alert(`What's new in ${item.v}:
+  reg.addEventListener("updatefound", () => {
+    if (reg.installing)
+      reg.installing.addEventListener("statechange", () => {
+        if (reg.waiting) {
+          if (navigator.serviceWorker.controller) invokeSWUpdateFlow(reg);
+          else silentlog("Installed sw for the first time.");
+        }
+      });
+  });
 
-${item.text}`);
-		} else {
-			alert(item.text);;
-		}
-		newsRead++;
-		localStorage.setItem('newsread', newsRead);
-	})
+  let refreshing = false;
+  let firstSW = !navigator.serviceWorker.controller;
+
+  // detect controller change and refresh the page
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!refreshing && !firstSW) {
+      window.location.reload();
+      refreshing = true;
+    }
+  });
+
+  import("./game.js");
 }

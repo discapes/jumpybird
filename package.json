@@ -11,11 +11,11 @@
   },
   "author": "Miika Tuominen",
   "devDependencies": {
-    "@babel/core": "^7.18.9",
-    "babel-preset-minify": ">=0.5.2",
+    "@babel/core": "^7.20.5",
+    "babel-preset-minify": "^0.5.2",
     "chokidar": "^3.5.3",
     "clean-css": "^5.3.1",
     "glob": "^8.0.3",
-    "serve": ">=14.0.1"
+    "serve": "^14.1.2"
   }
 }
